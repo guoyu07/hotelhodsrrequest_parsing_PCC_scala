@@ -1,0 +1,111 @@
+Aim:
+To count the PCC|PropertyCode|Year|Month and produce them in a compressed output files(gzip).
+
+==========================================================================================================================================================================================================
+Input/Output:
+I/P:
+October, November, December of 2015 and January through October 2016 records(Ex: 2016-06-06 00:00:01|00014651892011137E6D6CA000000000|7E6D6CA0|N|3SIH|GH|11431|HOD11431/07JUN-11JUN2$SW/RC-C,F,S|SW)
+O/P:
+a textfile with count of Recrods.
+a gzip file with PCC|PropertyCode|Year|Month|Count (Ex: 7YFC|20437|2015|10|17)
+
+==========================================================================================================================================================================================================
+TableStructure:
+
+hotelhodsrrequest
+
+0)requestts (string)
+1)sessionid (string)
+2)transactionid (string)
+3)clickthroughind (string)
+4)pcccode (string)
+5)hotelchaincode (string)
+6)propertycode (int)
+7)requesttext (string)
+8)posindicator (string)
+========================================================================================================================================================================================================
+Jar Building:
+
+No Single instace(class or object) should be more then 64KB in size for compliation of jar.
+
+the rightly compled project is sampletest.
+
+=======================================================================================================================================================================================================
+
+Unix:
+
+cat ReducePCCArray/*.gz > total.gz
+
+gunzip -c total.gz > total.txt
+
+cat total.txt | more
+
+======================================================================================================================================================================================================
+
+hadoop:
+
+hadoop fs -ls
+hdfs dfs -du pat/to/Directory (for each file size)
+hadoop fs -du -s -h path/to/Directory
+
+hadoop fs -copyToLocal ReducePCCArray/ ~/ 
+
+hadoop fs -copyFromLocal total_output/total.gz /user/sg952655/
+
+hadoop fs -copyFromLocal total_output/total.txt /user/sg952655/
+
+=======================================================================================================================================================================================================
+
+Compression Techniques for Spark:
+
+    /**The following solutions use pyspark, but I assume the code in Scala would be similar.
+    *First option is to set the following when you initialise your SparkConf:
+    *this will produce all the outputs in compressed fromat
+    *conf.set("spark.hadoop.mapred.output.compress", "true")
+    *conf.set("spark.hadoop.mapred.output.compression.codec", "true")
+    *conf.set("spark.hadoop.mapred.output.compression.codec", "org.apache.hadoop.io.compress.GzipCodec")
+    *conf.set("spark.hadoop.mapred.output.compression.type", "BLOCK")
+   
+    *Spark: writing DataFrame as compressed JSON [Resolved]
+    * Second option, if you want to compress only selected files within your context. Lets say "df" is your dataframe and filename your destination:
+    * df_rdd = self.df.toJSON()
+    * df_rdd.saveAsTextFile(filename,compressionCodecClass="org.apache.hadoop.io.compress.GzipCodec")
+    */
+    
+    /** only for a specific file to be outputed in compressed fromat
+      * import org.apache.hadoop.io.compress.GzipCodec
+      * combPrdGrp3.repartition(10).saveAsTextFile("/user/sg952655/ReducePCCArray/", classOf[GzipCodec])
+      */
+    
+
+=======================================================================================================================================================================================================
+Running:
+
+zip -d your_jar.jar 'META-INF/.SF' 'META-INF/.RSA' 'META-INF/*SF'
+
+spark-submit --master yarn --num-executors 40 --driver-memory 20G --executor-cores 20 --executor-memory 45G your_jar.jar
+
+========================================================================================================================================================================================================
+Check Running Applications and Coludera default port number:
+
+NameNode home: 
+http://bdaolp011node04.sabre.com:8088/cluster
+Running Applications in NameNode:
+http://bdaolp011node04.sabre.com:8088/cluster/apps/RUNNING
+
+The default address of namenode server is hdfs://localhost:8020/. You can connect to it to access HDFS by HDFS api.
+
+The default address of namenode web UI is http://localhost:50070/. You can open this address in your browser and check the namenode information.
+
+ResourceManager	http://rm_host:port/(Default HTTP port is 8088)
+NodeManager port number is 8042.
+
+========================================================================================================================================================================================================
+Hive Table creation:
+
+comments in hive are -- only single line cooments are supported.
+look at the hotelhodsrrequest_PCCparsing_scala.sql file comments for compressed table creation.
+
+
+
+

@@ -76,7 +76,17 @@ Compression Techniques for Spark:
       * import org.apache.hadoop.io.compress.GzipCodec
       * combPrdGrp3.repartition(10).saveAsTextFile("/user/sg952655/ReducePCCArray/", classOf[GzipCodec])
       */
-    
+
+========================================================================================================================================
+========================================================================================================================================
+
+Merging Spark RDD's:
+Merging Spark RDD's can be done using Seq and union functions
+    val textFile1 = sc.textFile("/user/hive/warehouse/ehotel.db/hotelhodsrrequest/year=2015/month=10/day=*/*.gz")
+    val textFile2 = sc.textFile("/user/hive/warehouse/ehotel.db/hotelhodsrrequest/year=2015/month=11/day=*/*.gz")
+    val textFile3 = sc.textFile("/user/hive/warehouse/ehotel.db/hotelhodsrrequest/year=2015/month=12/day=*/*.gz")
+    val textFile_rdds = Seq(textFile1, textFile2, textFile3)
+    val textFile = sc.union(textFile_rdds)
 
 =======================================================================================================================================================================================================
 Running:
